@@ -1,175 +1,103 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { fireEvent, render, screen } from '@testing-library/react';
 import App from '../App';
-import testData from '../../cypress/mocks/testData';
+import testData from '../../cypress/mocks/testData'
+import userEvent from '@testing-library/user-event';
 
-const CENTO_E_TRINTA = 130;
+beforeEach(() => {
+  global.fetch = jest.fn().mockReturnValue({
+    json: jest.fn().mockReturnValue(testData)
+  })
+  render(<App />)
+});
 
-describe('Teste a aplicação StarWars"', () => {
-  beforeEach(() => {
-    global.fetch = jest.fn().mockResolvedValue({
-      json: () => Promise.resolve(testData),
-    });
-  });
+test('testa se tem o planeta Alderaan e quando filtrado por nome "ta" o planeta não seja mais renderizado', () => {
+  const planet = screen.getByText(/Alderaan/i)
+  expect(planet).toBeInTheDocument()
+  const input = screen.getByTestId('name-filter')
+  expect(input).toBeInTheDocument()
+  userEvent.type(input, 'ta');
+  expect(planet).not.toBeInTheDocument()
+  expect(screen.getByText('Tatooine')).toBeInTheDocument()
+});
 
-  test('Testa o mock da API', async () => {
-    render(<App />);
-    const url = 'https://swapi.dev/api/planets';
+test('testa o filtro "greater than"', () => {
+  fireEvent.change(screen.getByTestId('column-filter'), {target: {value: 'diameter'}})
+  fireEvent.change(screen.getByTestId('comparison-filter'), {target: {value: 'greater than'}})
+  const input = screen.getByTestId('value-filter')
+  userEvent.type(input, '12500');
+  userEvent.click(screen.getByTestId('button-filter'))
+  expect(screen.getByText(/Bespin/i)).toBeInTheDocument()
+  const tr = screen.getAllByRole('row')
+  expect(tr.length).toBe(3)
+});
 
-    expect(global.fetch).toHaveBeenCalled();
-    expect(global.fetch).toHaveBeenCalledWith(url);
-  });
+test('testa o filtro "less than"', () => {
+  fireEvent.change(screen.getByTestId('column-filter'), {target: {value: 'orbital_period'}})
+  fireEvent.change(screen.getByTestId('comparison-filter'), {target: {value: 'less than'}})
+  const input = screen.getByTestId('value-filter')
+  userEvent.type(input, '350');
+  userEvent.click(screen.getByTestId('button-filter'))
+  expect(screen.getByText(/Dagobah/i)).toBeInTheDocument()
+  const tr = screen.getAllByRole('row')
+  expect(tr.length).toBe(4)
+});
 
-  test('Testa se exite o Título StarWars esta presente na aplicação', () => {
-    render(<App />);
-    const title = screen.getByRole('heading', { level: 1, name: /starwars/i });
-    expect(title).toBeInTheDocument();
-  });
+test('testa o filtro "equal to"', () => {
+  fireEvent.change(screen.getByTestId('column-filter'), {target: {value: 'rotation_period'}})
+  fireEvent.change(screen.getByTestId('comparison-filter'), {target: {value: 'equal to'}})
+  const input = screen.getByTestId('value-filter')
+  userEvent.type(input, '18');
+  userEvent.click(screen.getByTestId('button-filter'))
+  expect(screen.getByText(/Endor/i)).toBeInTheDocument()
+  const tr = screen.getAllByRole('row')
+  expect(tr.length).toBe(2)
+});
 
-  test('Testa se exite o campo de input na aplicação', () => {
-    render(<App />);
+test('testa o botão de deletar filtro e remover todos os filtros', () => {
+  //filtro 1
+  fireEvent.change(screen.getByTestId('column-filter'), {target: {value: 'population'}})
+  fireEvent.change(screen.getByTestId('comparison-filter'), {target: {value: 'greater than'}})
+  const input = screen.getByTestId('value-filter')
+  userEvent.type(input, '1000');
+  userEvent.click(screen.getByTestId('button-filter'))
+  //filtro 2
+  fireEvent.change(screen.getByTestId('column-filter'), {target: {value: 'orbital_period'}})
+  fireEvent.change(screen.getByTestId('comparison-filter'), {target: {value: 'less than'}})
+  userEvent.type(input, '400');
+  userEvent.click(screen.getByTestId('button-filter'))
+  //filtro 3
+  fireEvent.change(screen.getByTestId('column-filter'), {target: {value: 'rotation_period'}})
+  fireEvent.change(screen.getByTestId('comparison-filter'), {target: {value: 'equal to'}})
+  userEvent.type(input, '24');
+  userEvent.click(screen.getByTestId('button-filter'))
+  expect(screen.getAllByRole('row').length).toBe(3)
 
-    const inputText = screen.getByTestId(/name-filter/i);
-    expect(inputText).toBeInTheDocument();
-    expect(inputText).toHaveProperty('value', '');
+  const deleteButton = screen.getAllByTestId(/DeleteIcon/i)
+  expect(deleteButton.length).toBe(3)
+  userEvent.click(deleteButton[2])
+  expect(screen.getAllByRole('row').length).toBe(5)
 
-    userEvent.type(inputText, 'Coruscant');
-    expect(inputText).toHaveProperty('value', 'Coruscant');
-  });
+  const buttonRemoveAllFilters = screen.getByText(/Remove All Filters/)
+  userEvent.click(buttonRemoveAllFilters)
+  expect(screen.getAllByRole('row').length).toBe(11)
 
-  test('Testa se exite o campo de colunas na aplicação', () => {
-    render(<App />);
-    const columnSelect = screen.getByTestId(/column-filter/i);
-    expect(columnSelect).toBeInTheDocument();
-  });
+});
 
-  test('Testa se exite o campo de comparação na aplicação', () => {
-    render(<App />);
-    const comparisonSelect = screen.getByTestId(/comparison-filter/i);
-    expect(comparisonSelect).toBeInTheDocument();
-  });
+test('testa ordenar de forma "ascendente"', () => {
+  fireEvent.change(screen.getByTestId("column-sort"), {target: {value: 'population'}})
+  const asc = screen.getByTestId('column-sort-input-asc')
+  userEvent.click(asc)
+  userEvent.click(screen.getByText(/SORT/))
+  const tr = screen.getAllByRole('row')
+  expect(tr[1]).toHaveTextContent(/Yavin/)
+});
 
-  test('Testa se exite o campo de input (number) na aplicação', () => {
-    render(<App />);
-    const numberInput = screen.getByTestId(/value-filter/i);
-    expect(numberInput).toBeInTheDocument();
-    expect(numberInput).toHaveProperty('value', '0');
-
-    userEvent.clear(numberInput);
-    userEvent.type(numberInput, '1000');
-    expect(numberInput).toHaveProperty('value', '1000');
-  });
-
-  test('Testa se exite o botão "Filtrar" ao iniciar a aplicação', () => {
-    render(<App />);
-    const filterButton = screen.getByRole('button', { name: /Filtrar/i });
-    expect(filterButton).toBeInTheDocument();
-  });
-
-  test('Testa se exite uma tabela na aplicação', async () => {
-    render(<App />);
-
-    const table = screen.getByRole('table');
-    expect(table).toBeInTheDocument();
-
-    const cell = await screen.findAllByRole('cell');
-    expect(cell).toHaveLength(CENTO_E_TRINTA);
-  });
-
-  test('Testa se exite o header da tabela na aplicação', async () => {
-    render(<App />);
-
-    await waitFor(() => {
-      expect(screen.getByText(/Name/i)).toBeInTheDocument();
-      expect(screen.getByText(/Terrain/i)).toBeInTheDocument();
-      expect(screen.getByText(/URL/i)).toBeInTheDocument();
-    });
-  });
-
-  test('Testa se exite o body da tabela na aplicação', async () => {
-    render(<App />);
-
-    await waitFor(() => {
-      expect(screen.getByText(/Tatooine/i)).toBeInTheDocument();
-      expect(screen.getByText(/Dagobah/i)).toBeInTheDocument();
-      expect(screen.getByText(/Kamino/i)).toBeInTheDocument();
-    });
-  });
-
-  test('Testa o filtro input na aplicação', async () => {
-    render(<App />);
-
-    const inputText = screen.getByTestId(/name-filter/i);
-    expect(inputText).toBeInTheDocument();
-    userEvent.type(inputText, 'oo');
-
-    await waitFor(() => {
-      expect(screen.getByText(/Naboo/i)).toBeInTheDocument();
-    });
-  });
-
-  test('Testa todos os filtros', async () => {
-    render(<App />);
-
-    await waitFor(() => {
-      expect(screen.getByText(/Tatooine/i)).toBeInTheDocument();
-      expect(screen.getByText(/Kamino/i)).toBeInTheDocument();
-    });
-
-    // teste 1:
-    const columnSelect = screen.getByTestId(/column-filter/i);
-    expect(columnSelect).toBeInTheDocument();
-    userEvent.selectOptions(columnSelect, 'rotation_period');
-    const comparisonSelect = screen.getByTestId(/comparison-filter/i);
-    expect(comparisonSelect).toBeInTheDocument();
-    userEvent.selectOptions(comparisonSelect, 'maior que');
-    const numberInput = screen.getByTestId(/value-filter/i);
-    expect(numberInput).toBeInTheDocument();
-    expect(numberInput).toHaveProperty('value', '0');
-    userEvent.clear(numberInput);
-    userEvent.type(numberInput, '15');
-    const filterButton = screen.getByRole('button', { name: /Filtrar/i });
-    expect(filterButton).toBeInTheDocument();
-    userEvent.click(filterButton);
-    await waitFor(() => {
-      expect(screen.getByText(/Alderaan/i)).toBeInTheDocument();
-    });
-
-    // teste 2:
-    userEvent.selectOptions(columnSelect, 'diameter');
-    userEvent.selectOptions(comparisonSelect, 'menor que');
-    userEvent.clear(numberInput);
-    userEvent.type(numberInput, '1000');
-    userEvent.click(filterButton);
-
-    // teste 3:
-    userEvent.selectOptions(columnSelect, 'surface_water');
-    userEvent.selectOptions(comparisonSelect, 'igual a');
-    userEvent.clear(numberInput);
-    userEvent.type(numberInput, '40');
-    userEvent.click(filterButton);
-  });
-
-  test('Testa filtro "Igual a" (pela segunda vez)', async () => {
-    render(<App />);
-
-    const columnSelect = screen.getByTestId(/column-filter/i);
-    expect(columnSelect).toBeInTheDocument();
-    userEvent.selectOptions(columnSelect, 'population');
-    const comparisonSelect = screen.getByTestId(/comparison-filter/i);
-    expect(comparisonSelect).toBeInTheDocument();
-    userEvent.selectOptions(comparisonSelect, 'igual a');
-    const numberInput = screen.getByTestId(/value-filter/i);
-    expect(numberInput).toBeInTheDocument();
-    expect(numberInput).toHaveProperty('value', '0');
-    userEvent.clear(numberInput);
-    userEvent.type(numberInput, '6000000');
-    const filterButton = screen.getByRole('button', { name: /Filtrar/i });
-    expect(filterButton).toBeInTheDocument();
-    userEvent.click(filterButton);
-    await waitFor(() => {
-      expect(screen.getByText(/Bespin/i)).toBeInTheDocument();
-    });
-  });
+test('testa ordenar de forma "descendente"', () => {
+  fireEvent.change(screen.getByTestId("column-sort"), {target: {value: 'population'}})
+  const asc = screen.getByTestId("column-sort-input-desc")
+  userEvent.click(asc)
+  userEvent.click(screen.getByText(/SORT/))
+  const tr = screen.getAllByRole('row')
+  expect(tr[1]).toHaveTextContent(/Coruscant/)
 });
