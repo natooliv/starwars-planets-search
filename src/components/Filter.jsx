@@ -1,6 +1,6 @@
 import React, { useContext, useEffect } from 'react';
 import StarWarsContext from '../context/StarWarsContext';
-
+// aqui importo o useContext para poder usar o context e o useEffect para poder usar o hook
 function Filter() {
   const {
     filterByName,
@@ -14,12 +14,16 @@ function Filter() {
     setColumnSelect,
     concatFilters,
     setConcatFilters } = useContext(StarWarsContext);
+    // console.log(concatFilters);
+    // aqui eu tenho que fazer um map para pegar os valores de cada objeto e colocar no span
+    // e depois fazer um filter para remover o objeto do array concatFilters
+    //  referencia para fazer o filter: https://www.w3schools.com/jsref/jsref_filter.asp
 
-  const removeFilters = ({ target: { id } }) => {
+  const removendoFiltros = ({ target: { id } }) => {
     setConcatFilters(concatFilters.filter((fil) => fil.column !== id));
     setColumnSelect([...columnSelect, id]);
   };
-
+  //  aqui eu tenho que fazer um filter para remover todos os objetos do array concatFilters
   const removeAllFilters = () => {
     setConcatFilters([]);
     setColumnSelect([
@@ -30,7 +34,9 @@ function Filter() {
       'surface_water',
     ]);
   };
-
+  // aqui eu tenho que fazer um filter para remover o objeto do array concatFilters
+  // e depois fazer um filter para remover o valor do array columnSelect
+  // e também do array concatFilters
   useEffect(() => {
     if (!concatFilters.length) return setPlanetList(planetListOrigin);
     let filtered = planetListOrigin;
@@ -47,6 +53,9 @@ function Filter() {
     });
   }, [concatFilters]);
 
+  // aqui eu tenho que fazer um filter para remover o valor do array columnSelect  e
+  // também do array concatFilters
+
   const filter = () => {
     setConcatFilters([...concatFilters, filterByNumericValues]);
     setColumnSelect(columnSelect
@@ -57,7 +66,8 @@ function Filter() {
       valueF: 0,
     });
   };
-
+  // aqui renderizo os filtros que foram selecionados
+  // e também o botão para remover todos os filtros
   return (
     <main>
       <input
@@ -78,6 +88,7 @@ function Filter() {
           value={ filterByNumericValues.column }
           onChange={ handleChangeAll }
         >
+          {/* // aqui eu faço um map para renderizar as opções do select */}
           {columnSelect.map((option) => (
             <option value={ option } key={ option }>
               {option}
@@ -118,13 +129,15 @@ function Filter() {
       >
         Filter
       </button>
+      {/*  aqui faz o map dos filtros que foram selecionados e renderiza na tela */}
       {concatFilters.length > 0 && concatFilters.map(({ column, comparison, valueF }) => (
         <div data-testid="filter" key={ column }>
           <span>{ `${column} ${comparison} ${valueF}` }</span>
-          <button type="button" id={ column } onClick={ removeFilters }>X</button>
+          <button type="button" id={ column } onClick={ removendoFiltros }>X</button>
         </div>
       ))}
       <button
+      // aqui  é o botao para remover todos os filtros */
         type="button"
         data-testid="button-remove-filters"
         onClick={ removeAllFilters }
@@ -134,6 +147,6 @@ function Filter() {
       </button>
     </main>
   );
-}
+} // fim da função Filter
 
 export default Filter;

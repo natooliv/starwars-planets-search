@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 
 function useFetchApi() {
-  const [planetList, setPlanetList] = useState([]);
-  const [planetListOrigin, setPlanetListOrigin] = useState([]);
+  const [planetLista, setPlanetLista] = useState([]);
+  const [planetListOriginal, setPlanetListOriginal] = useState([]);
 
   useEffect(() => {
     const getPlanets = async () => {
@@ -10,17 +10,19 @@ function useFetchApi() {
         const url = 'https://swapi.dev/api/planets';
         const response = await fetch(url);
         const { results } = await response.json();
+        // aqui é api que eu quero consumir
         const filteredResults = results.filter((item) => delete item.residents);
-        setPlanetList(filteredResults);
-        setPlanetListOrigin(filteredResults);
+        // aqui eu quero filtrar o array de planetas
+        setPlanetLista(filteredResults);
+        setPlanetListOriginal(filteredResults);
       } catch (error) {
-        console.log('API endpoint not found');
+        // aqui  é o erro que eu quero tratar
       }
     };
     getPlanets();
   }, []);
 
-  return { planetList, setPlanetList, planetListOrigin };
+  return { planetLista, setPlanetLista, planetListOriginal };
 }
 
 export default useFetchApi;

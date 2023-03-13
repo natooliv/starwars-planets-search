@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import StarWarsContext from './StarWarsContext';
 import useFetchApi from '../components/services/useFetchApi';
+// aqui eu importo o useFetchApi que é o meu custom hook
+// e o StarWarsContext que é o meu context
 
 function StarWarsProvider({ children }) {
-  const { planetList, getPlanets, setPlanetList, planetListOrigin } = useFetchApi();
+  const { planetLista, getPlanets, setPlanetLista, planetListOriginal } = useFetchApi();
 
-  const [filterByName, setFilterByName] = useState('');
+  const [filterByNome, setFilterByNome] = useState('');
   const [columnSelect, setColumnSelect] = useState([
     'population',
     'orbital_period',
@@ -14,6 +16,12 @@ function StarWarsProvider({ children }) {
     'rotation_period',
     'surface_water',
   ]);
+  // aqui eu crio um array com os valores que vão ser usados no select
+  // e passo esse array para o meu context
+  // para que eu possa usar no meu componente
+  // e assim eu consigo fazer o meu select dinâmico
+  // e não preciso criar um select para cada coluna
+  // referencia do select dinâmico: https://www.youtube.com/watch?v=8gKX9JZ0Y0o
   const [comparisonSelect, setComparisonSelect] = useState('maior que');
   const [values, setValues] = useState(0);
   const [filterByNumericValues, setFilterByNumericValues] = useState({
@@ -21,16 +29,19 @@ function StarWarsProvider({ children }) {
     comparison: 'maior que',
     valueF: 0,
   });
+
   const [concatFilters, setConcatFilters] = useState([]);
 
-  const filteredPlanetName = filterByName.length > 0 ? planetList
+  const filteredPlanetName = filterByNome.length > 0 ? planetLista
     .filter((planet) => (planet.name).toLowerCase()
-      .includes(filterByName.toLowerCase())) : planetList;
+      .includes(filterByNome.toLowerCase())) : planetLista;
 
-  const handleChangeName = ({ target: { value } }) => {
+  const handleChangeNome = ({ target: { value } }) => {
     setFilterByName(value);
   };
-
+  // aqui eu crio uma função que vai ser usada no meu input
+  // para que eu possa filtrar os planetas pelo nome
+  // e passo essa função para o meu context
   const handleChangeAll = ({ target: { value, name } }) => {
     setFilterByNumericValues({
       ...filterByNumericValues,
@@ -38,13 +49,13 @@ function StarWarsProvider({ children }) {
   };
 
   const context = {
-    planetList,
+    planetLista,
     getPlanets,
-    setPlanetList,
-    filterByName,
-    setFilterByName,
+    setPlanetLista,
+    filterByNome,
+    setFilterByNome,
     filteredPlanetName,
-    handleChangeName,
+    handleChangeNome,
     concatFilters,
     columnSelect,
     setColumnSelect,
@@ -56,7 +67,7 @@ function StarWarsProvider({ children }) {
     setFilterByNumericValues,
     setConcatFilters,
     handleChangeAll,
-    planetListOrigin,
+    planetListOriginal,
   };
 
   return (

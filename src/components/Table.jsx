@@ -5,6 +5,10 @@ function Table() {
   const { planetList, filteredPlanetName } = useContext(StarWarsContext);
 
   // console.log(planetList);
+  // aqui eu consigo ver o que tem dentro do array de planetas
+  // e consigo ver o que tem dentro do array de planetas filtrados
+  // referencia: https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Reference/Global_Objects/Array/map
+  // mais uma referencia sobre map: https://www.youtube.com/watch?v=2qDzgNcNcXU
 
   return (
     <main>
