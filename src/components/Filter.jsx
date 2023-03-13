@@ -6,9 +6,9 @@ function Filter() {
     filterByName,
     handleChangeName,
     handleChangeAll,
-    setPlanetList,
+    setPlanetLista,
     columnSelect,
-    planetListOrigin,
+    planetListOriginal,
     filterByNumericValues,
     setFilterByNumericValues,
     setColumnSelect,
@@ -38,8 +38,8 @@ function Filter() {
   // e depois fazer um filter para remover o valor do array columnSelect
   // e também do array concatFilters
   useEffect(() => {
-    if (!concatFilters.length) return setPlanetList(planetListOrigin);
-    let filtered = planetListOrigin;
+    if (!concatFilters.length) return setPlanetList(planetListOriginal);
+    let filtered = planetListOriginal;
     concatFilters.forEach((filter) => {
       const { column, comparison, valueF } = filter;
       if (comparison === 'maior que') {
@@ -49,7 +49,7 @@ function Filter() {
       } if (comparison === 'igual a') {
         filtered = filtered.filter((a) => Number(a[column]) === Number(valueF));
       }
-      setPlanetList(filtered);
+      setPlanetLista(filtered);
     });
   }, [concatFilters]);
 
