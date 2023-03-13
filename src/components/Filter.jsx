@@ -3,8 +3,8 @@ import StarWarsContext from '../context/StarWarsContext';
 // aqui importo o useContext para poder usar o context e o useEffect para poder usar o hook
 function Filter() {
   const {
-    filterByName,
-    handleChangeName,
+    filterByNome,
+    handleChangeNome,
     handleChangeAll,
     setPlanetLista,
     columnSelect,
@@ -38,7 +38,7 @@ function Filter() {
   // e depois fazer um filter para remover o valor do array columnSelect
   // e também do array concatFilters
   useEffect(() => {
-    if (!concatFilters.length) return setPlanetList(planetListOriginal);
+    if (!concatFilters.length) return setPlanetLista(planetListOriginal);
     let filtered = planetListOriginal;
     concatFilters.forEach((filter) => {
       const { column, comparison, valueF } = filter;
@@ -75,8 +75,8 @@ function Filter() {
         name="filterByName"
         id="filterByName"
         data-testid="name-filter"
-        value={ filterByName }
-        onChange={ handleChangeName }
+        value={ filterByNome }
+        onChange={ handleChangeNome }
         placeholder="Nome"
       />
       <label htmlFor="column-filter">

@@ -37,7 +37,7 @@ function StarWarsProvider({ children }) {
       .includes(filterByNome.toLowerCase())) : planetLista;
 
   const handleChangeNome = ({ target: { value } }) => {
-    setFilterByName(value);
+    setFilterByNome(value);
   };
   // aqui eu crio uma função que vai ser usada no meu input
   // para que eu possa filtrar os planetas pelo nome

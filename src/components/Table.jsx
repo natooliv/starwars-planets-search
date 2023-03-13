@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import StarWarsContext from '../context/StarWarsContext';
 
 function Table() {
-  const { planetList, filteredPlanetName } = useContext(StarWarsContext);
+  const { planetLista, filteredPlanetName } = useContext(StarWarsContext);
 
   // console.log(planetList);
   // aqui eu consigo ver o que tem dentro do array de planetas
@@ -31,7 +31,7 @@ function Table() {
           </tr>
         </thead>
         <tbody>
-          { planetList && filteredPlanetName.map((planet) => (
+          { planetLista && filteredPlanetName.map((planet) => (
             <tr key={ planet.name }>
               <td>{ planet.name }</td>
               <td>{ planet.rotation_period }</td>
